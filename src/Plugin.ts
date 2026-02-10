@@ -1,0 +1,189 @@
+/**
+ * Plugin Base Class
+ * Extend this class to create a Duels+ plugin.
+ *
+ * @example
+ * ```typescript
+ * import { Plugin, PluginContext } from '@duelsplus/plugin-api';
+ *
+ * export default class MyPlugin extends Plugin {
+ *   id = 'my-plugin';
+ *   name = 'My Plugin';
+ *   description = 'Does cool things';
+ *
+ *   onLoad(ctx: PluginContext) {
+ *     ctx.events.on('game:start', (payload) => {
+ *       ctx.client.sendChat(`§aGame started on ${payload.map}!`);
+ *     });
+ *
+ *     ctx.commands.register({
+ *       name: 'myplugin',
+ *       description: 'My plugin command',
+ *       execute: (args) => {
+ *         ctx.client.sendChat('§bHello from my plugin!');
+ *       },
+ *     });
+ *   }
+ *
+ *   onEnable() {
+ *     this.logger.info('Enabled!');
+ *   }
+ *
+ *   onDisable() {
+ *     this.logger.info('Disabled!');
+ *   }
+ * }
+ * ```
+ *
+ * @module @duelsplus/plugin-api/Plugin
+ */
+
+import type { PluginContext, PluginLogger, PluginMetadata } from './types';
+
+/** Plugin lifecycle state */
+export type PluginState = 'unloaded' | 'loaded' | 'enabled' | 'disabled' | 'error';
+
+/**
+ * Abstract base class for all Duels+ plugins.
+ * Override the lifecycle methods to add your plugin's behavior.
+ */
+export abstract class Plugin {
+  /** Unique plugin identifier (must match your package.json duelsplus.id) */
+  abstract readonly id: string;
+
+  /** Display name for your plugin */
+  abstract readonly name: string;
+
+  /** Short description of what the plugin does */
+  readonly description: string = '';
+
+  /** Plugin version */
+  readonly version: string = '1.0.0';
+
+  /** Plugin author */
+  readonly author: string = '';
+
+  // Internal state — managed by the proxy's PluginManager
+  private _state: PluginState = 'unloaded';
+  private _context: PluginContext | null = null;
+
+  // ==========================================
+  // State Accessors
+  // ==========================================
+
+  /** Current plugin state */
+  get state(): PluginState {
+    return this._state;
+  }
+
+  /** Whether the plugin has been loaded */
+  get isLoaded(): boolean {
+    return this._state !== 'unloaded';
+  }
+
+  /** Whether the plugin is currently enabled */
+  get isEnabled(): boolean {
+    return this._state === 'enabled';
+  }
+
+  /** The plugin context (available after onLoad) */
+  get context(): PluginContext | null {
+    return this._context;
+  }
+
+  /**
+   * Namespaced logger — available at all times.
+   * Before the plugin is loaded, falls back to console.
+   */
+  protected get logger(): PluginLogger {
+    if (this._context) {
+      return this._context.logger;
+    }
+    // Fallback logger before context is injected
+    return {
+      info: (msg: string, ...args: unknown[]) =>
+        console.log(`[Plugin:${this.name}] ${msg}`, ...args),
+      warn: (msg: string, ...args: unknown[]) =>
+        console.warn(`[Plugin:${this.name}] ${msg}`, ...args),
+      error: (msg: string, ...args: unknown[]) =>
+        console.error(`[Plugin:${this.name}] ${msg}`, ...args),
+      debug: (msg: string, ...args: unknown[]) =>
+        console.debug(`[Plugin:${this.name}] ${msg}`, ...args),
+    };
+  }
+
+  // ==========================================
+  // Internal Methods (called by PluginManager)
+  // ==========================================
+
+  /**
+   * @internal Inject the plugin context. Called by the PluginManager.
+   * Do NOT call this directly.
+   */
+  _setContext(context: PluginContext): void {
+    this._context = context;
+  }
+
+  /**
+   * @internal Update the plugin state. Called by the PluginManager.
+   * Do NOT call this directly.
+   */
+  _setState(state: PluginState): void {
+    this._state = state;
+  }
+
+  // ==========================================
+  // Lifecycle Methods — Override These
+  // ==========================================
+
+  /**
+   * Called when the plugin is loaded.
+   * Use this to set up event listeners, register commands, and initialize state.
+   * The PluginContext is available as the first argument and via `this.context`.
+   *
+   * @param context The full plugin context
+   */
+  onLoad(context: PluginContext): void | Promise<void> {
+    // Override in your plugin
+  }
+
+  /**
+   * Called when the plugin is enabled (after loading).
+   * Plugins are auto-enabled after loading. Use this for activation logic.
+   */
+  onEnable(): void | Promise<void> {
+    // Override in your plugin
+  }
+
+  /**
+   * Called when the plugin is disabled.
+   * Use this to stop timers, clean up state, etc.
+   * Event listeners and commands are automatically cleaned up by the proxy.
+   */
+  onDisable(): void | Promise<void> {
+    // Override in your plugin
+  }
+
+  /**
+   * Called when the plugin is being unloaded (proxy shutdown or plugin removal).
+   * Use this for final cleanup. After this, the plugin context is no longer valid.
+   */
+  onUnload(): void | Promise<void> {
+    // Override in your plugin
+  }
+
+  // ==========================================
+  // Metadata
+  // ==========================================
+
+  /** Get the plugin's metadata */
+  getMetadata(): PluginMetadata {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      version: this.version,
+      author: this.author,
+    };
+  }
+}
