@@ -67,9 +67,9 @@ export abstract class Plugin {
   private _state: PluginState = 'unloaded';
   private _context: PluginContext | null = null;
 
-  // ==========================================
+  
   // State Accessors
-  // ==========================================
+  
 
   /** Current plugin state */
   get state(): PluginState {
@@ -112,9 +112,9 @@ export abstract class Plugin {
     };
   }
 
-  // ==========================================
+  
   // Internal Methods (called by PluginManager)
-  // ==========================================
+  
 
   /**
    * @internal Inject the plugin context. Called by the PluginManager.
@@ -132,9 +132,9 @@ export abstract class Plugin {
     this._state = state;
   }
 
-  // ==========================================
+  
   // Lifecycle Methods — Override These
-  // ==========================================
+  
 
   /**
    * Called when the plugin is loaded.
@@ -172,9 +172,9 @@ export abstract class Plugin {
     // Override in your plugin
   }
 
-  // ==========================================
+  
   // Metadata
-  // ==========================================
+  
 
   /** Get the plugin's metadata */
   getMetadata(): PluginMetadata {

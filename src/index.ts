@@ -32,6 +32,15 @@ export type {
   // Game state
   LocrawData,
   GameResult,
+  GamePhase,
+
+  // Player & stats data types
+  PlayerInfo,
+  HypixelPlayerStats,
+  SessionStats,
+  DailyStatsSnapshot,
+  GameLogEntry,
+  TeamInfo,
 
   // Events
   PluginEventName,
@@ -40,8 +49,13 @@ export type {
   ClientDisconnectedPayload,
   GameStartPayload,
   GameEndPayload,
+  GameJoinPayload,
+  GameLeavePayload,
   LobbyJoinPayload,
   LocrawUpdatePayload,
+  OpponentDetectedPayload,
+  OpponentStatsPayload,
+  ModeChangePayload,
   PluginEventPayloadMap,
   PluginEventHandler,
 
@@ -53,8 +67,16 @@ export type {
   PluginCommands,
   PluginStorage,
   PluginPackets,
+  PluginPlayers,
+  PluginSessionStats,
+  PluginScoreboard,
+  PluginSettings,
+  PluginScheduler,
   PluginLogger,
   ProxyInfo,
+
+  // Settings
+  SettingsChangeCallback,
 
   // Commands
   PluginCommandDefinition,
