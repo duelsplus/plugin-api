@@ -1,6 +1,8 @@
 # @duelsplus/plugin-api
 
-Official Plugin API for the Duels+ Proxy. Use this package to build plugins that run inside the proxy;
+Official Plugin API for the Duels+ Proxy. Use this package to build plugins that run inside the proxy.
+
+**Documentation:** [developers.duelsplus.com](https://developers.duelsplus.com/)
 
 ## Installation
 
@@ -34,4 +36,5 @@ Plugins live in `~/.duelsplus/plugins/<your-plugin>/`. The proxy loads them at s
 See the [examples](examples/) directory for full plugins: auto-glhf, match-alerts, opponent-tracker, session-overlay, game-logger, lobby-spy.
 
 ## License
-idrk
+
+See [LICENSE](LICENSE) for the full text.
