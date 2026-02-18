@@ -26,7 +26,7 @@ export default class AutoGLHF extends Plugin {
       this.sentThisGame = false;
     });
 
-    // Send glhf once the opponent is detected — the game is actually running
+    // Send glhf once the opponent is detected - the game is actually running
     ctx.events.on('opponent:detected', () => {
       if (this.sentThisGame) return; // Only send once per game
       this.sentThisGame = true;
