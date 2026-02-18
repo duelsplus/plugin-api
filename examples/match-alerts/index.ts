@@ -72,7 +72,7 @@ export default class MatchAlerts extends Plugin {
       ctx.client.playSound('mob.villager.death', 0.8, 0.8);
     });
 
-    // Lobby join — gentle notification
+    // Lobby join - gentle notification
     ctx.events.on('lobby:join', (payload) => {
       if (payload.gametype === 'DUELS') {
         ctx.client.playSound('note.harp', 0.3, 1.0);

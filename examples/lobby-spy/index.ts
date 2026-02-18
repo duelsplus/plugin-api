@@ -2,7 +2,7 @@
  * Lobby Spy Plugin
  * Demonstrates: players API, scoreboard, events, packets, settings API
  *
- * When in a Duels lobby, shows information about lobby players — their
+ * When in a Duels lobby, shows information about lobby players - their
  * stats, winstreak, and client type. Watches for high-threat opponents
  * and alerts you with a title + sound.
  */
@@ -45,7 +45,7 @@ export default class LobbySpy extends Plugin {
 
     // Listen for scoreboard changes via packets to detect player joins
     ctx.packets.onClientbound('scoreboard_team', (data) => {
-      // This is read-only observation — just log for debugging
+      // This is read-only observation - just log for debugging
       const packet = data as { team?: string; mode?: number; players?: string[] };
       if (packet.mode === 3 && packet.players) {
         this.logger.debug(`Players added to team ${packet.team}: ${packet.players.join(', ')}`);

@@ -1,6 +1,9 @@
 /**
- * Plugin API Type Definitions
- * All types, interfaces, and contracts for the Duels+ Plugin System
+ * Plugin API type definitions.
+ * All types, interfaces, and contracts for the Duels+ Plugin System.
+ * See {@link PluginContext} for the main API surface; event payloads are keyed by {@link PluginEventName}.
+ *
+ * @packageDocumentation
  * @module @duelsplus/plugin-api/types
  */
 
@@ -12,11 +15,11 @@ export interface LocrawData {
     server: string;
     /** Game type (e.g., "DUELS", "BEDWARS") */
     gametype?: string;
-    /** Lobby name — only set when in a lobby */
+    /** Lobby name - only set when in a lobby */
     lobbyname?: string;
     /** Game mode (e.g., "DUELS_UHC_DUEL") */
     mode?: string;
-    /** Map name — only set when in a game */
+    /** Map name - only set when in a game */
     map?: string;
 }
 
@@ -147,7 +150,7 @@ export type PluginEventName =
     | "opponent:detected"
     | "opponent:stats";
 
-/** Base event payload — all events include a timestamp */
+/** Base event payload - all events include a timestamp */
 export interface BaseEventPayload {
     timestamp: number;
 }
@@ -164,7 +167,7 @@ export interface ClientDisconnectedPayload extends BaseEventPayload {
     reason?: string;
 }
 
-/** Payload for game:start */
+/** Payload for game:start. @see PluginEventName "game:start" */
 export interface GameStartPayload extends BaseEventPayload {
     mode: string;
     map?: string;
@@ -172,7 +175,7 @@ export interface GameStartPayload extends BaseEventPayload {
     server: string;
 }
 
-/** Payload for game:end, game:victory, game:defeat */
+/** Payload for game:end, game:victory, game:defeat. @see PluginEventName */
 export interface GameEndPayload extends BaseEventPayload {
     mode: string;
     map: string;
@@ -194,7 +197,7 @@ export interface LocrawUpdatePayload extends BaseEventPayload {
     previous?: LocrawData;
 }
 
-/** Payload for opponent:detected */
+/** Payload for opponent:detected. @see PluginEventName "opponent:detected" */
 export interface OpponentDetectedPayload extends BaseEventPayload {
     /** Opponent's username */
     username: string;
@@ -279,21 +282,34 @@ export type PluginEventHandler<E extends PluginEventName> = (
 // Plugin API Interfaces
 
 /**
- * Event subscription API
- * Subscribe to proxy lifecycle, game, and connection events.
+ * Event subscription API.
+ * Subscribe to proxy lifecycle, game, and connection events. Handlers are type-safe:
+ * the payload type is inferred from the event name via {@link PluginEventName} and {@link PluginEventPayloadMap}.
  */
 export interface PluginEvents {
-    /** Subscribe to an event */
+    /**
+     * Subscribe to an event.
+     * @param event - Event name (e.g. "game:start", "opponent:detected")
+     * @param handler - Callback receiving the typed payload for that event
+     */
     on<E extends PluginEventName>(
         event: E,
         handler: PluginEventHandler<E>,
     ): void;
-    /** Subscribe to an event (fires once then auto-removes) */
+    /**
+     * Subscribe to an event (fires once then auto-removes).
+     * @param event - Event name
+     * @param handler - Callback receiving the typed payload
+     */
     once<E extends PluginEventName>(
         event: E,
         handler: PluginEventHandler<E>,
     ): void;
-    /** Unsubscribe from an event */
+    /**
+     * Unsubscribe from an event.
+     * @param event - Event name
+     * @param handler - The same function reference passed to on() or once()
+     */
     off<E extends PluginEventName>(
         event: E,
         handler: PluginEventHandler<E>,
@@ -327,11 +343,21 @@ export interface PluginClient {
     sendChat(message: string | object): void;
     /** Send a chat message to the server as the player (e.g. "glhf", "/play duels") */
     sendGameChat(message: string): void;
-    /** Send a title and optional subtitle to the player */
+    /**
+     * Send a title and optional subtitle to the player.
+     * @param title - Main title text (supports § color codes)
+     * @param subtitle - Optional subtitle text
+     * @param options - Optional fadeIn, stay, fadeOut (in ticks)
+     */
     sendTitle(title: string, subtitle?: string, options?: TitleOptions): void;
     /** Send an action bar message to the player */
     sendActionBar(message: string): void;
-    /** Play a sound to the player */
+    /**
+     * Play a sound to the player.
+     * @param name - Sound resource name (e.g. "random.levelup", "mob.villager.death")
+     * @param volume - Volume 0–1 (default 1)
+     * @param pitch - Pitch multiplier (default 1)
+     */
     playSound(name: string, volume?: number, pitch?: number): void;
     /** Send any arbitrary packet to the player's client (advanced) */
     sendPacket(name: string, data: unknown): void;
@@ -371,26 +397,39 @@ export interface PluginGameState {
     isInDuels(): boolean;
     /** Check if the player is in a Bedwars game/lobby */
     isInBedwars(): boolean;
-    /** Get the current game phase */
+    /** Get the current game phase (pregame, ingame, postgame, lobby, unknown) */
     getGamePhase(): GamePhase;
 
-    /** Read a user setting value (e.g., "autoStats", "pearlTimer") */
+    /**
+     * Read a user setting value (e.g. "autoStats", "pearlTimer").
+     * @param key - Setting key
+     */
     getSetting(key: string): unknown;
-    /** Read a value from the runtime cache */
+    /**
+     * Read a value from the runtime cache (proxy-internal key-value store).
+     * @param key - Cache key
+     */
     getCache(key: string): unknown;
 }
 
-/** Plugin command definition */
+/**
+ * Plugin command definition.
+ * Commands are invoked by the player as /commandname; the proxy routes them to the plugin's execute.
+ */
 export interface PluginCommandDefinition {
-    /** Command name (e.g., "myplugin" for /myplugin) */
+    /** Command name (e.g. "myplugin" for /myplugin) */
     name: string;
     /** Description shown in help */
     description: string;
-    /** Usage syntax shown in help (e.g., "/myplugin <action> [args]") */
+    /** Usage syntax shown in help (e.g. "/myplugin <action> [args]") */
     usage?: string;
-    /** Alternative names for this command */
+    /** Alternative names for this command (e.g. ["mp"] for /mp) */
     aliases?: string[];
-    /** Execute the command */
+    /**
+     * Execute the command.
+     * @param args - Arguments after the command name (e.g. /myplugin on → ["on"])
+     * @param sender - The player who ran the command (username, uuid)
+     */
     execute: (
         args: string[],
         sender: { username: string; uuid: string },
@@ -409,9 +448,9 @@ export interface PluginCommands {
 }
 
 /**
- * Persistent per-plugin key-value storage
- * Data is stored in ~/.duelsplus/plugins/<plugin-id>/storage.json
- * and persists across proxy restarts.
+ * Persistent per-plugin key-value storage.
+ * Data is stored in `~/.duelsplus/plugins/<plugin-id>/storage.json` and persists across proxy restarts.
+ * Values must be JSON-serializable (objects, arrays, primitives).
  */
 export interface PluginStorage {
     /** Get a stored value by key */
@@ -440,27 +479,31 @@ export interface PacketMeta {
 export type PacketListenerHandler = (data: unknown, meta: PacketMeta) => void;
 
 /**
- * Read-only packet listening API
- * Observe packets flowing between the client and server.
- * Listeners are read-only — you cannot modify or cancel packets.
- *
- * NOTE: Fast-path packets (movement, combat, chunks, etc.) are NOT observable
- * for performance reasons. Only processed packets are visible.
+ * Read-only packet listening API.
+ * Observe packets flowing between the client and server. Listeners are read-only - you cannot modify or cancel packets.
+ * Fast-path packets (movement, combat, chunks, etc.) are NOT observable for performance; only processed packets are visible.
  */
 export interface PluginPackets {
-    /** Listen to a packet coming from the server (Hypixel → player) */
+    /**
+     * Listen to a packet from the server (Hypixel → player).
+     * @param packetName - Packet name (e.g. "chat", "player_info")
+     * @param handler - Callback (data, meta) where meta has name and state
+     */
     onClientbound(packetName: string, handler: PacketListenerHandler): void;
-    /** Listen to a packet coming from the client (player → Hypixel) */
+    /**
+     * Listen to a packet from the client (player → Hypixel).
+     * @param packetName - Packet name
+     * @param handler - Callback (data, meta)
+     */
     onServerbound(packetName: string, handler: PacketListenerHandler): void;
-    /** Remove a clientbound packet listener */
+    /** Remove a clientbound packet listener (same handler reference as onClientbound) */
     offClientbound(packetName: string, handler: PacketListenerHandler): void;
     /** Remove a serverbound packet listener */
     offServerbound(packetName: string, handler: PacketListenerHandler): void;
 }
 
 /**
- * Players API
- * Access opponent and player data, fetch Hypixel stats, resolve UUIDs.
+ * Players API: opponent and player data, Hypixel stats, UUID resolution.
  */
 export interface PluginPlayers {
     /** Get the list of confirmed opponents in the current game */
@@ -471,26 +514,25 @@ export interface PluginPlayers {
     isRealPlayer(uuid: string): boolean;
     /** Get the UUID mapped to an entity ID (from named_entity_spawn) */
     getUuidForEntity(entityId: number): string | undefined;
-    /** Fetch a player's Hypixel stats by UUID (uses cache when available) */
+    /** Fetch a player's Hypixel stats by UUID (uses cache when available). @returns Promise resolving to stats or null */
     fetchStats(uuid: string): Promise<HypixelPlayerStats | null>;
-    /** Fetch a player's Hypixel stats by username */
+    /** Fetch a player's Hypixel stats by username. @returns Promise resolving to stats or null */
     fetchStatsByUsername(username: string): Promise<HypixelPlayerStats | null>;
-    /** Resolve a username to a UUID via Mojang API */
+    /** Resolve a username to a UUID via Mojang API. @returns Promise resolving to UUID or null */
     resolveUuid(username: string): Promise<string | null>;
-    /** Resolve a UUID to a username via Hypixel API (cached) */
+    /** Resolve a UUID to a username via Hypixel API (cached). @returns Promise resolving to username or null */
     resolveUsername(uuid: string): Promise<string | null>;
 }
 
 /**
- * Session & daily stats API
- * Access the player's current session and daily performance data.
+ * Session and daily stats API: current session and daily performance data.
  */
 export interface PluginSessionStats {
-    /** Get current session stats (null if no active session) */
+    /** Get current session stats. @returns SessionStats or null if no active session */
     getSessionStats(): SessionStats | null;
-    /** Get daily stats (null if service unavailable) */
+    /** Get daily stats. @returns DailyStatsSnapshot or null if service unavailable */
     getDailyStats(): DailyStatsSnapshot | null;
-    /** Get stats for a specific game mode from the daily tracker */
+    /** Get stats for a specific game mode from the daily tracker. @returns wins, losses, wlr or null */
     getModeStats(
         mode: string,
     ): { wins: number; losses: number; wlr: number } | null;
@@ -572,39 +614,50 @@ export interface ProxyInfo {
 }
 
 /**
- * The full plugin context — your gateway to the proxy.
- * Received in `onLoad()`. Store it to use across your plugin's lifecycle.
+ * The full plugin context - your gateway to the proxy.
+ * Received in `onLoad()`. Store it (e.g. `this.ctx = ctx`) to use across your plugin's lifecycle.
+ *
+ * @example
+ * ```ts
+ * onLoad(ctx: PluginContext) {
+ *   this.ctx = ctx;
+ *   ctx.events.on('game:start', (p) => ctx.client.sendChat(`§a${p.mode} started!`));
+ *   ctx.commands.register({ name: 'hello', description: 'Say hi', execute: () => ctx.client.sendChat('Hi!') });
+ * }
+ * ```
  */
 export interface PluginContext {
-    /** Subscribe to proxy events */
+    /** Subscribe to proxy events (game:start, opponent:detected, etc.) */
     readonly events: PluginEvents;
-    /** Send packets/messages to the player's client */
+    /** Send chat, titles, sounds, and packets to the player's client or to the server */
     readonly client: PluginClient;
-    /** Game state (location, settings, etc.) */
+    /** Game state: locraw, mode, map, isInGame(), isInLobby(), getSetting(), getCache() */
     readonly gameState: PluginGameState;
-    /** Register/unregister chat commands */
+    /** Register/unregister chat commands (e.g. /mycommand) */
     readonly commands: PluginCommands;
-    /** Persistent key-value storage */
+    /** Persistent key-value storage (persisted to disk per plugin) */
     readonly storage: PluginStorage;
-    /** Read-only packet observation */
+    /** Read-only packet observation (clientbound/serverbound) */
     readonly packets: PluginPackets;
-    /** Namespaced logger */
+    /** Namespaced logger (info, warn, error, debug) */
     readonly logger: PluginLogger;
     /** Proxy version and metadata */
     readonly proxy: ProxyInfo;
-    /** Player and opponent data, stat fetching */
+    /** Player and opponent data, Hypixel stats, UUID resolution */
     readonly players: PluginPlayers;
-    /** Session and daily stats */
+    /** Session and daily stats, game log */
     readonly stats: PluginSessionStats;
-    /** Scoreboard team data */
+    /** Scoreboard team data (getTeams, getPlayerTeam) */
     readonly scoreboard: PluginScoreboard;
-    /** Read/write proxy settings */
+    /** Read/write proxy settings, onChange subscription */
     readonly settings: PluginSettings;
-    /** Managed timers (auto-cleanup on unload) */
+    /** Managed timers (setTimeout/setInterval, auto-cleanup on unload) */
     readonly scheduler: PluginScheduler;
 }
 
-/** Plugin metadata (matches the "duelsplus" field in package.json) */
+/**
+ * Plugin metadata (matches the "duelsplus" field in package.json).
+ */
 export interface PluginMetadata {
     /** Unique plugin identifier */
     id: string;
@@ -612,10 +665,10 @@ export interface PluginMetadata {
     name: string;
     /** Description of what the plugin does */
     description?: string;
-    /** Plugin version */
+    /** Plugin version (semver) */
     version?: string;
     /** Plugin author */
     author?: string;
-    /** Minimum plugin API version required (semver range) */
+    /** Minimum plugin API version required; semver range (e.g. ">=1.0.0") so the proxy can reject incompatible plugins */
     apiVersion?: string;
 }

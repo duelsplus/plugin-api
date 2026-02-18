@@ -48,22 +48,36 @@ export type PluginState = 'unloaded' | 'loaded' | 'enabled' | 'disabled' | 'erro
  * Override the lifecycle methods to add your plugin's behavior.
  */
 export abstract class Plugin {
-  /** Unique plugin identifier (must match your package.json duelsplus.id) */
+  /**
+   * Unique plugin identifier.
+   * @remarks Must match the `duelsplus.id` field in your plugin's package.json so the proxy can load and identify your plugin.
+   */
   abstract readonly id: string;
 
-  /** Display name for your plugin */
+  /**
+   * Display name for your plugin (shown in logs and help).
+   */
   abstract readonly name: string;
 
-  /** Short description of what the plugin does */
+  /**
+   * Short description of what the plugin does.
+   * @remarks Optional; used in help and plugin listings.
+   */
   readonly description: string = '';
 
-  /** Plugin version */
+  /**
+   * Plugin version (semver).
+   * @remarks Optional; defaults to "1.0.0" if not set.
+   */
   readonly version: string = '1.0.0';
 
-  /** Plugin author */
+  /**
+   * Plugin author.
+   * @remarks Optional; used in metadata and plugin listings.
+   */
   readonly author: string = '';
 
-  // Internal state — managed by the proxy's PluginManager
+  // Internal state - managed by the proxy's PluginManager
   private _state: PluginState = 'unloaded';
   private _context: PluginContext | null = null;
 
@@ -92,7 +106,7 @@ export abstract class Plugin {
   }
 
   /**
-   * Namespaced logger — available at all times.
+   * Namespaced logger - available at all times.
    * Before the plugin is loaded, falls back to console.
    */
   protected get logger(): PluginLogger {
@@ -133,7 +147,7 @@ export abstract class Plugin {
   }
 
   
-  // Lifecycle Methods — Override These
+  // Lifecycle Methods - Override These
   
 
   /**
@@ -141,6 +155,8 @@ export abstract class Plugin {
    * Use this to set up event listeners, register commands, and initialize state.
    * The PluginContext is available as the first argument and via `this.context`.
    *
+   * @remarks Override this to subscribe to events (e.g. `ctx.events.on('game:start', ...)`),
+   * register commands (`ctx.commands.register(...)`), and read/write storage.
    * @param context The full plugin context
    */
   onLoad(context: PluginContext): void | Promise<void> {
@@ -149,7 +165,10 @@ export abstract class Plugin {
 
   /**
    * Called when the plugin is enabled (after loading).
-   * Plugins are auto-enabled after loading. Use this for activation logic.
+   * Plugins are auto-enabled after loading.
+   *
+   * @remarks Override for activation logic that should run once the plugin is live
+   * (e.g. starting a background task). Prefer setting up subscriptions in onLoad.
    */
   onEnable(): void | Promise<void> {
     // Override in your plugin
@@ -157,7 +176,8 @@ export abstract class Plugin {
 
   /**
    * Called when the plugin is disabled.
-   * Use this to stop timers, clean up state, etc.
+   *
+   * @remarks Override to stop timers, clear intervals, or reset in-memory state.
    * Event listeners and commands are automatically cleaned up by the proxy.
    */
   onDisable(): void | Promise<void> {
@@ -166,7 +186,9 @@ export abstract class Plugin {
 
   /**
    * Called when the plugin is being unloaded (proxy shutdown or plugin removal).
-   * Use this for final cleanup. After this, the plugin context is no longer valid.
+   *
+   * @remarks Override for final cleanup (e.g. flushing storage). After this,
+   * the plugin context is no longer valid; do not use ctx or this.context.
    */
   onUnload(): void | Promise<void> {
     // Override in your plugin

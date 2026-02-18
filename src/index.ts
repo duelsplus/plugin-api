@@ -1,8 +1,10 @@
 /**
- * @duelsplus/plugin-api
+ * @packageDocumentation
  *
- * Official Plugin API for the Duels+ Proxy.
- * Import types and the Plugin base class from this package to build plugins.
+ * Official Plugin API for the Duels+ Proxy. This package provides types and the
+ * {@link Plugin} base class for building plugins that run inside the proxy.
+ * Your plugin receives a {@link PluginContext} in `onLoad()` with access to
+ * events, client, game state, commands, storage, and more.
  *
  * @example
  * ```typescript
@@ -20,6 +22,8 @@
  * }
  * ```
  *
+ * @see {@link Plugin} - Base class to extend
+ * @see {@link PluginContext} - Context passed to onLoad()
  * @module @duelsplus/plugin-api
  */
 
