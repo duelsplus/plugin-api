@@ -1,28 +1,31 @@
 {
-  "name": "@duelsplus/plugin-api",
-  "version": "1.0.0",
-  "description": "Plugin API for Duels+ Proxy",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsc",
-    "clean": "rimraf dist",
-    "prepublishOnly": "npm run build"
-  },
-  "keywords": [
-    "duelsplus",
-    "minecraft",
-    "proxy",
-    "plugin",
-    "hypixel"
-  ],
-  "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^20.19.32",
-    "rimraf": "^6.0.1",
-    "typescript": "^5.3.3"
-  }
+    "name": "@duelsplus/plugin-api",
+    "version": "1.0.0",
+    "description": "Plugin API for Duels+ Proxy",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "clean": "rimraf dist",
+        "prepublishOnly": "npm run build"
+    },
+    "keywords": [
+        "duelsplus",
+        "minecraft",
+        "proxy",
+        "plugin",
+        "hypixel"
+    ],
+    "license": "ISC",
+    "devDependencies": {
+        "@types/node": "^20.19.32",
+        "rimraf": "^6.0.1",
+        "typescript": "^5.3.3"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
 }
