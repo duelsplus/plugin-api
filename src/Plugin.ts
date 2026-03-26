@@ -12,10 +12,14 @@
  *   description = 'Does cool things';
  *
  *   onLoad(ctx: PluginContext) {
+ *     ctx.gameModes.register({
+ *       id: 'example-mode',
+ *       match: ({ gametype, mode }) => gametype === 'MYGAME' && mode === 'MY_MODE',
+ *       extractStats: () => ({ wins: 0, losses: 0, winstreak: 0, bestWinstreak: 0, tagKills: 0, tagDeaths: 0 }),
+ *     });
  *     ctx.events.on('game:start', (payload) => {
  *       ctx.client.sendChat(`§aGame started on ${payload.map}!`);
  *     });
- *
  *     ctx.commands.register({
  *       name: 'myplugin',
  *       description: 'My plugin command',

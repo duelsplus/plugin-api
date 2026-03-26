@@ -614,6 +614,65 @@ export interface ProxyInfo {
 }
 
 /**
+ * Current game identity for {@link GameModeExtension.match}.
+ * `gametype` / `mode` are Hypixel /locraw values (may be null briefly after server change).
+ */
+export interface GameModeMatchContext {
+    gametype: string | null;
+    mode: string | null;
+}
+
+/**
+ * Mode-specific stats for auto-stats chat + stat tags, produced by a {@link GameModeExtension}.
+ */
+export interface GameModeStatExtraction {
+    wins: number;
+    losses: number;
+    winstreak: number;
+    bestWinstreak: number;
+    /** Mapped to stat-tag "Kills" (e.g. Bedwars final kills) */
+    tagKills: number;
+    /** Mapped to stat-tag "Deaths" (e.g. Bedwars final deaths) */
+    tagDeaths: number;
+}
+
+/**
+ * Register support for a game/mode without changing proxy core.
+ * First matching extension wins (registration order). Unregister on plugin unload is automatic.
+ */
+export interface GameModeExtension {
+    /** Stable id unique within your plugin (e.g. `hypixel-bedwars-queues`) */
+    id: string;
+    /** Return true when this extension should handle the current /locraw game */
+    match(ctx: GameModeMatchContext): boolean;
+    /**
+     * Supply wins/losses/streaks and tag kills/deaths from raw Hypixel `player` API JSON.
+     * Return null to fall back to built-in Duels mode stats.
+     */
+    extractStats?(rawHypixelPlayer: Record<string, unknown>, locrawMode: string): GameModeStatExtraction | null;
+    /**
+     * Stat-tag colour strategy for prefix/suffix stats.
+     * `ratio` — WLR/FKDR-style tiers; omit or `duels` for default Duels+ behaviour.
+     */
+    statTagColorProfile?: "duels" | "ratio";
+    /**
+     * Use Hypixel scoreboard team colour for the base nametag (multi-team games).
+     * Core already handles Bridge and Hypixel Bedwars; set for new games.
+     */
+    useScoreboardTeamColors?: boolean;
+    /** Show coloured Bedwars star block in solo auto-stats lines (needs Hypixel bedwars level on profile) */
+    showHypixelBedwarsStarsInAutoStats?: boolean;
+}
+
+/**
+ * API surface on {@link PluginContext} to register game mode behaviour.
+ */
+export interface PluginGameModes {
+    register(extension: GameModeExtension): void;
+    unregister(extensionId: string): void;
+}
+
+/**
  * The full plugin context - your gateway to the proxy.
  * Received in `onLoad()`. Store it (e.g. `this.ctx = ctx`) to use across your plugin's lifecycle.
  *
@@ -653,6 +712,10 @@ export interface PluginContext {
     readonly settings: PluginSettings;
     /** Managed timers (setTimeout/setInterval, auto-cleanup on unload) */
     readonly scheduler: PluginScheduler;
+    /**
+     * Register custom /locraw modes: stat extraction for auto-stats + stat tags, colours, team nametags.
+     */
+    readonly gameModes: PluginGameModes;
 }
 
 /**

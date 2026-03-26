@@ -94,4 +94,10 @@ export type {
 
   // Metadata
   PluginMetadata,
+
+  // Pluggable game modes (no proxy fork)
+  GameModeMatchContext,
+  GameModeStatExtraction,
+  GameModeExtension,
+  PluginGameModes,
 } from './types';
