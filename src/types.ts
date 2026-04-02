@@ -672,6 +672,70 @@ export interface PluginGameModes {
     unregister(extensionId: string): void;
 }
 
+// ─── Chest GUI API ───
+
+/** Click handler callback for GUI slots */
+export type GUIClickHandler = (slot: number, button: 'left' | 'right') => void | Promise<void>;
+
+/** Number of rows for a chest GUI (1-6) */
+export type GUIRows = 1 | 2 | 3 | 4 | 5 | 6;
+
+/** Item data for GUI slots */
+export interface GUIItemData {
+    blockId: number;
+    itemCount?: number;
+    itemDamage?: number;
+    nbtData?: unknown;
+}
+
+/** Chest GUI instance for creating interactive inventory windows */
+export interface PluginChestGUI {
+    /** The unique window ID for this GUI */
+    readonly windowId: number;
+    /** Number of rows */
+    readonly rows: GUIRows;
+    /** Total slot count (rows * 9) */
+    readonly slotCount: number;
+    /** Whether the GUI is currently open */
+    readonly isOpen: boolean;
+    /** Set an item in a specific slot with optional click handler */
+    setItem(slot: number, item: GUIItemData, onClick?: GUIClickHandler): this;
+    /** Remove an item from a slot */
+    removeItem(slot: number): this;
+    /** Clear all items */
+    clear(): this;
+    /** Fill empty slots with an item (e.g. glass panes) */
+    fill(item: GUIItemData): this;
+    /** Fill empty slots with black stained glass panes */
+    fillBlack(): this;
+    /** Fill empty slots with gray stained glass panes */
+    fillGray(): this;
+    /** Create a border around the GUI */
+    border(item: GUIItemData): this;
+    /** Set a row of items */
+    setRow(row: number, items: (GUIItemData | null)[], startCol?: number): this;
+    /** Center an item in a row (column 4) */
+    centerItem(row: number, item: GUIItemData, onClick?: GUIClickHandler): this;
+    /** Open the GUI to the player. Returns true on success. */
+    open(): boolean;
+    /** Close the GUI */
+    close(): void;
+    /** Refresh the GUI contents (re-send items) */
+    refresh(): boolean;
+    /** Update a single slot without full refresh */
+    updateSlot(slot: number, item: GUIItemData, onClick?: GUIClickHandler): boolean;
+}
+
+/** GUI API: create interactive chest inventory windows */
+export interface PluginGUI {
+    /** Create a new chest GUI with title and optional row count (1-6, default 3) */
+    createChestGUI(title: string, rows?: GUIRows): PluginChestGUI;
+    /** Create a glass pane item (for fillers/borders) */
+    createGlassPane(color: number, name?: string): GUIItemData;
+    /** Create an item with optional name and lore */
+    createItem(blockId: number, damage?: number, name?: string, lore?: string[]): GUIItemData;
+}
+
 /**
  * The full plugin context - your gateway to the proxy.
  * Received in `onLoad()`. Store it (e.g. `this.ctx = ctx`) to use across your plugin's lifecycle.
@@ -716,6 +780,8 @@ export interface PluginContext {
      * Register custom /locraw modes: stat extraction for auto-stats + stat tags, colours, team nametags.
      */
     readonly gameModes: PluginGameModes;
+    /** Create interactive chest GUI windows */
+    readonly gui: PluginGUI;
 }
 
 /**

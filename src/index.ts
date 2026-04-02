@@ -100,4 +100,11 @@ export type {
   GameModeStatExtraction,
   GameModeExtension,
   PluginGameModes,
+
+  // GUI
+  GUIClickHandler,
+  GUIRows,
+  GUIItemData,
+  PluginChestGUI,
+  PluginGUI,
 } from './types';
