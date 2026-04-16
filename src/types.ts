@@ -634,6 +634,8 @@ export interface GameModeStatExtraction {
     tagKills: number;
     /** Mapped to stat-tag "Deaths" (e.g. Bedwars final deaths) */
     tagDeaths: number;
+    /** Game-specific level/prestige (e.g. Bedwars stars). Mapped to stat-tag "Stars". */
+    stars?: number;
 }
 
 /**
