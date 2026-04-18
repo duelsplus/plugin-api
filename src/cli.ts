@@ -1,17 +1,5 @@
 #!/usr/bin/env node
 
-/**
- * Duels+ Plugin Build CLI
- *
- * Bundles a plugin and all its dependencies into a single JS file using esbuild.
- * The @duelsplus/plugin-api package is marked as external since the proxy
- * provides it at runtime.
- *
- * Usage:
- *   npx @duelsplus/plugin-api build          # build from current directory
- *   npx @duelsplus/plugin-api build ./path   # build from a specific directory
- */
-
 import { build, type BuildOptions } from 'esbuild';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -77,18 +65,18 @@ async function buildPlugin(pluginDir: string, options: { minify: boolean; watch:
     error(`Failed to parse package.json in ${pluginDir}`);
   }
 
-  // Resolve entry point
   const mainField = pkg.main ?? 'index.js';
   let entryPoint: string | undefined;
 
-  // Try the main field as-is, then common TypeScript alternatives
+  // Prefer source files over compiled output to avoid overwriting dist/
   const candidates = [
-    mainField,
-    mainField.replace(/\.js$/, '.ts'),
+    mainField.replace(/^dist\//, 'src/').replace(/\.js$/, '.ts'),
     'src/index.ts',
     'src/index.js',
     'index.ts',
     'index.js',
+    mainField.replace(/\.js$/, '.ts'),
+    mainField,
   ];
 
   for (const candidate of candidates) {
@@ -122,7 +110,6 @@ async function buildPlugin(pluginDir: string, options: { minify: boolean; watch:
     minify: options.minify,
     sourcemap: false,
     logLevel: 'warning',
-    // Tree-shake unused code
     treeShaking: true,
   };
 
@@ -137,12 +124,10 @@ async function buildPlugin(pluginDir: string, options: { minify: boolean; watch:
       error(`Build failed with ${result.errors.length} error(s)`);
     }
 
-    // Report output size
     const stat = fs.statSync(outFile);
     const sizeKB = (stat.size / 1024).toFixed(1);
     success(`Built successfully! (${sizeKB} KB)`);
 
-    // Update package.json main field to point to dist/index.js if it doesn't already
     if (pkg.main !== 'dist/index.js') {
       info(`Tip: set "main": "dist/index.js" in your package.json for the proxy to load the bundled file.`);
     }
@@ -162,7 +147,6 @@ async function main(): Promise<void> {
     error(`Unknown command: ${command}. Use "build" to bundle your plugin.`);
   }
 
-  // Parse flags and positional args
   const flags = args.slice(1);
   const minify = flags.includes('--minify');
   const watch = flags.includes('--watch');
