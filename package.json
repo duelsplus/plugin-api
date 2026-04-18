@@ -4,6 +4,9 @@
     "description": "Plugin API for Duels+ Proxy",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "bin": {
+        "duelsplus": "dist/cli.js"
+    },
     "files": [
         "dist"
     ],
@@ -20,6 +23,9 @@
         "hypixel"
     ],
     "license": "ISC",
+    "dependencies": {
+        "esbuild": "^0.21.0"
+    },
     "devDependencies": {
         "@types/node": "^20.19.32",
         "rimraf": "^6.0.1",
