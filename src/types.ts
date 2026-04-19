@@ -545,8 +545,24 @@ export interface PluginSessionStats {
 }
 
 /**
+ * Read-only snapshot of the sidebar scoreboard currently shown to the player.
+ */
+export interface SidebarSnapshot {
+    /**
+     * Sidebar title as sent by the server, with Minecraft color codes intact.
+     * Empty string if no title was sent.
+     */
+    title: string;
+    /**
+     * Sidebar lines in top-to-bottom display order, with color codes intact.
+     * Empty strings are allowed — they represent blank rows on the sidebar.
+     */
+    lines: string[];
+}
+
+/**
  * Scoreboard API
- * Read-only access to scoreboard team data.
+ * Read-only access to scoreboard team data and the sidebar.
  */
 export interface PluginScoreboard {
     /** Get all teams currently tracked */
@@ -555,6 +571,12 @@ export interface PluginScoreboard {
     getTeam(name: string): TeamInfo | undefined;
     /** Get the team a player belongs to */
     getPlayerTeam(username: string): TeamInfo | undefined;
+    /**
+     * Get a snapshot of the sidebar scoreboard (title + lines, top-to-bottom).
+     * Returns `null` if no sidebar is currently displayed. Color codes (`§`-prefixed)
+     * are preserved so callers can match on them (e.g. lobby vs. in-game colors).
+     */
+    getSidebar(): SidebarSnapshot | null;
 }
 
 /** Settings change callback */

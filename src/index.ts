@@ -74,6 +74,7 @@ export type {
   PluginPlayers,
   PluginSessionStats,
   PluginScoreboard,
+  SidebarSnapshot,
   PluginSettings,
   PluginScheduler,
   PluginLogger,
