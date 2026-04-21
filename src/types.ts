@@ -65,6 +65,7 @@ export interface HypixelPlayerStats {
         finalDeaths: number;
         fkdr: number;
         bedsBroken: number;
+        bedsLost: number;
         stars: number;
     };
     /** Hypixel network level */
