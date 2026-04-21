@@ -657,8 +657,91 @@ export interface GameModeStatExtraction {
     tagKills: number;
     /** Mapped to stat-tag "Deaths" (e.g. Bedwars final deaths) */
     tagDeaths: number;
-    /** Game-specific level/prestige (e.g. Bedwars stars). Mapped to stat-tag "Stars". */
-    stars?: number;
+    /** Game-specific level/prestige (e.g. Bedwars stars, Skywars levels). Available to plugin-contributed stat options. */
+    level?: number;
+}
+
+/**
+ * Display + numeric pairing returned by a {@link PluginStatTagOption.extract}.
+ * `display` is the text rendered in the tag (e.g. `"1350"`, `"3.7"`); `raw` is used
+ * for colour thresholds and sorting.
+ */
+export interface StatTagValue {
+    display: string;
+    raw: number;
+}
+
+/**
+ * Predeclared colour strategies the proxy knows how to render. Plugin-contributed
+ * stat options can either pick one of these, or supply a custom `(raw) => "§x"` function.
+ *
+ * - `wins` — proxy's built-in wins palette
+ * - `losses` — proxy's built-in losses palette
+ * - `ratio` — WLR/FKDR-style tiered palette
+ * - `level` — level/prestige tiered palette (Hypixel Bedwars star-style)
+ * - `winstreakCurrent` — current winstreak palette
+ * - `winstreakBest` — best winstreak palette
+ * - `neutral` — flat grey; no threshold colouring
+ */
+export type StatTagColorKind =
+    | "wins"
+    | "losses"
+    | "ratio"
+    | "level"
+    | "winstreakCurrent"
+    | "winstreakBest"
+    | "neutral";
+
+/**
+ * A stat-tag option contributed by a plugin. Registered via {@link GameModeExtension.statTagOptions};
+ * shows up as a selectable option in /ds stat-tag prefix/suffix cycles when the user is in a
+ * matching game mode.
+ */
+export interface PluginStatTagOption {
+    /** Stable id unique within the extension (e.g. `"fkdr"`, `"bws"`). Used for persistence. */
+    id: string;
+    /** Label shown in the settings cycle and stat-tag rendering (e.g. `"FKDR"`). */
+    display: string;
+    /**
+     * Produce the display text + raw numeric value from extracted stats.
+     * Return null to skip rendering this tag for this player.
+     */
+    extract(stats: GameModeStatExtraction): StatTagValue | null;
+    /**
+     * Colouring strategy. Either a known {@link StatTagColorKind} or a custom
+     * `(raw) => "§x"` function. Defaults to `"neutral"`.
+     */
+    color?: StatTagColorKind | ((raw: number) => string);
+}
+
+/**
+ * Rendering context passed to {@link PluginScoreboardStatOption.render}.
+ * Gives the plugin the current session snapshot + active game mode so it can
+ * tailor its scoreboard line without reaching into proxy internals.
+ */
+export interface ScoreboardStatRenderContext {
+    session: {
+        wins: number;
+        losses: number;
+        currentWinstreak: number;
+        durationMs: number;
+    };
+    /** Raw Hypixel /locraw mode, or null if unknown */
+    currentMode: string | null;
+}
+
+/**
+ * A scoreboard stat option contributed by a plugin. Registered via
+ * {@link GameModeExtension.scoreboardStatOptions}; available in /ds scoreboard
+ * settings when the user is in a matching game mode.
+ */
+export interface PluginScoreboardStatOption {
+    /** Stable id unique within the extension. Used for persistence. */
+    id: string;
+    /** Label shown in settings + rendered on the scoreboard (e.g. `"Beds Broken"`). */
+    label: string;
+    /** Return the formatted scoreboard line value, or null to omit. */
+    render(ctx: ScoreboardStatRenderContext): string | null;
 }
 
 /**
@@ -685,8 +768,24 @@ export interface GameModeExtension {
      * Core already handles Bridge and Hypixel Bedwars; set for new games.
      */
     useScoreboardTeamColors?: boolean;
-    /** Show coloured Bedwars star block in solo auto-stats lines (needs Hypixel bedwars level on profile) */
-    showHypixelBedwarsStarsInAutoStats?: boolean;
+    /** Show coloured level/star block in solo auto-stats lines (needs `level` on extracted stats) */
+    showLevelInAutoStats?: boolean;
+    /**
+     * Game-specific stat-tag options to expose in /ds prefix/suffix cycles
+     * while the user is in a matching mode (e.g. Bedwars' FKDR/BWS/Stars).
+     */
+    statTagOptions?: PluginStatTagOption[];
+    /**
+     * Game-specific scoreboard stat options to expose in /ds scoreboard settings
+     * while the user is in a matching mode.
+     */
+    scoreboardStatOptions?: PluginScoreboardStatOption[];
+    /**
+     * When true, the proxy treats this extension as authoritative for the
+     * scoreboard title while its `match()` holds — useful for games whose
+     * Hypixel scoreboard header differs from the proxy-assumed "DUELS" title.
+     */
+    replaceScoreboardTitle?: boolean;
 }
 
 /**

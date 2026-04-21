@@ -101,6 +101,11 @@ export type {
   GameModeStatExtraction,
   GameModeExtension,
   PluginGameModes,
+  StatTagValue,
+  StatTagColorKind,
+  PluginStatTagOption,
+  ScoreboardStatRenderContext,
+  PluginScoreboardStatOption,
 
   // GUI
   GUIClickHandler,
