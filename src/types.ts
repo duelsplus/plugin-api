@@ -580,6 +580,88 @@ export interface PluginScoreboard {
     getSidebar(): SidebarSnapshot | null;
 }
 
+/**
+ * Per-player tab list decoration (prefix and/or suffix).
+ *
+ * Both sides are optional — pass only what you need. Leave them both empty
+ * and the entry is effectively a clear.
+ */
+export interface TabListDecoration {
+    /** Text to splice in before the player's display name. Supports `§` color codes. */
+    prefix?: string;
+    /** Text to splice in after the player's display name. Supports `§` color codes. */
+    suffix?: string;
+}
+
+/**
+ * Tab List Decoration API
+ *
+ * Adds a prefix/suffix to a player's tab-list entry via the `player_info`
+ * UPDATE_DISPLAY_NAME channel. This channel has **no 16-byte cap** — unlike
+ * scoreboard team prefix/suffix (which drives above-head nametags) — so it's
+ * the right place to put full-length stat tags, ranks, or badges.
+ *
+ * Decorations are layered on top of the server's authoritative display name.
+ * They persist until cleared or the player leaves the tab list.
+ *
+ * @example
+ * ```ts
+ * // Show a full-length FKDR badge next to a player's name in the tab list
+ * ctx.tabList.setPlayerDisplay('Hachem', { suffix: ' §7[§a3.21 FKDR§7]' });
+ *
+ * // Later — clear it
+ * ctx.tabList.clearPlayerDisplay('Hachem');
+ * ```
+ *
+ * Only affects the tab list. Above-head nametags continue to use the
+ * team prefix/suffix channel and are not touched by this API.
+ */
+export interface PluginTabList {
+    /**
+     * Set or replace a player's tab-list decoration. If the player is already
+     * in the tab list, the change is visible immediately; if they arrive
+     * later, the decoration is applied as soon as their player_info entry
+     * appears.
+     *
+     * Passing an empty `{prefix: '', suffix: ''}` is equivalent to
+     * {@link clearPlayerDisplay}.
+     *
+     * @param username Case-insensitive player name. Resolved to UUID against
+     * the current tab list; players not yet in the tab list are ignored.
+     * @returns `true` if the decoration was stored (UUID resolved),
+     * `false` if the player is not currently resolvable.
+     */
+    setPlayerDisplay(username: string, decoration: TabListDecoration): boolean;
+
+    /**
+     * Same as {@link setPlayerDisplay} but keyed by UUID directly. Accepts
+     * either hyphenated (`8-4-4-4-12`) or unhyphenated 32-char hex form.
+     * No tab-list lookup is required, so this variant works even before the
+     * player appears.
+     */
+    setPlayerDisplayByUuid(uuid: string, decoration: TabListDecoration): void;
+
+    /**
+     * Remove the decoration for this player and restore the server's
+     * original tab-list display name. Safe to call with an unknown name.
+     *
+     * @returns `true` if a decoration was removed, `false` otherwise.
+     */
+    clearPlayerDisplay(username: string): boolean;
+
+    /** UUID-keyed variant of {@link clearPlayerDisplay}. */
+    clearPlayerDisplayByUuid(uuid: string): void;
+
+    /**
+     * Clear every decoration this plugin has set. Called automatically on
+     * plugin unload; you rarely need to call it yourself.
+     */
+    clearAll(): void;
+
+    /** True if this plugin currently has a decoration set for the given player. */
+    hasDecoration(username: string): boolean;
+}
+
 /** Settings change callback */
 export type SettingsChangeCallback = (
     key: string,
@@ -896,6 +978,8 @@ export interface PluginContext {
     readonly stats: PluginSessionStats;
     /** Scoreboard team data (getTeams, getPlayerTeam) */
     readonly scoreboard: PluginScoreboard;
+    /** Tab list decorations (setPlayerDisplay) — full-length prefix/suffix not capped to 16 bytes */
+    readonly tabList: PluginTabList;
     /** Read/write proxy settings, onChange subscription */
     readonly settings: PluginSettings;
     /** Managed timers (setTimeout/setInterval, auto-cleanup on unload) */

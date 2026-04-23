@@ -75,6 +75,8 @@ export type {
   PluginSessionStats,
   PluginScoreboard,
   SidebarSnapshot,
+  PluginTabList,
+  TabListDecoration,
   PluginSettings,
   PluginScheduler,
   PluginLogger,
