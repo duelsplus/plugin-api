@@ -115,4 +115,12 @@ export type {
   GUIItemData,
   PluginChestGUI,
   PluginGUI,
+
+  // Apollo
+  PluginGlow,
+  PluginNametag,
+  PluginApollo,
+  PluginHologram,
+  HologramLocation,
+  HologramOptions,
 } from './types';
