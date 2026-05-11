@@ -942,6 +942,58 @@ export interface PluginGUI {
     createItem(blockId: number, damage?: number, name?: string, lore?: string[]): GUIItemData;
 }
 
+export interface PluginApollo {
+    /* Check if the player connected with lunar client */
+    readonly isUsingLunarClient: boolean;
+}
+
+export interface HologramLocation {
+    world: string;
+    x: number;
+    y: number;
+    z: number;
+}
+
+export interface HologramOptions {
+    showThroughWalls?: boolean;
+    showShadow?: boolean;
+    showBackground?: boolean;
+}
+
+export interface PluginHologram {
+    display(id: string, location: HologramLocation, lines: string[], options?: HologramOptions): void;
+    remove(id: string): void;
+    clearAll(): void;
+}
+
+export interface PluginGlow {
+    // override glow
+    setGlowColor(uuid: string, color: number): void;
+
+    // reset glow override
+    resetGlow(uuid: string): void;
+
+    // clear all glow overrides
+    clearAll(): void;
+
+    // does the plugin have a glow override for the uuid
+    hasGlow(uuid: string): boolean;
+}
+
+export interface PluginNametag {
+    // override nametag
+    setNametag(uuid: string, lines: string[]): void;
+
+    // reset nametag override
+    resetNametag(uuid: string): void;
+
+    // clear all nametag overrides
+    clearAll(): void;
+
+    // does the plugin have a nametag override for the uuid
+    hasNametag(uuid: string): boolean;
+}
+
 /**
  * The full plugin context - your gateway to the proxy.
  * Received in `onLoad()`. Store it (e.g. `this.ctx = ctx`) to use across your plugin's lifecycle.
@@ -990,6 +1042,10 @@ export interface PluginContext {
     readonly gameModes: PluginGameModes;
     /** Create interactive chest GUI windows */
     readonly gui: PluginGUI;
+    readonly glow: PluginGlow;
+    readonly nametag: PluginNametag;
+    readonly apollo: PluginApollo;
+    readonly hologram: PluginHologram;
 }
 
 /**
