@@ -37,6 +37,8 @@ export {
   EarlyChatBuffer,
   SessionTracker,
   GamePhaseDriver,
+  ScopedLogger,
+  createLogger,
 } from './helpers';
 export type {
   WhoTrackerOptions,

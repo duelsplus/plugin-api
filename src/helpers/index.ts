@@ -17,3 +17,5 @@ export type { SessionTrackerOptions } from './SessionTracker';
 
 export { GamePhaseDriver } from './GamePhaseDriver';
 export type { GamePhaseDriverOptions, PhaseListener, PollListener } from './GamePhaseDriver';
+
+export { ScopedLogger, createLogger } from './ScopedLogger';
