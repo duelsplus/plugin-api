@@ -31,6 +31,22 @@
 export { Plugin } from './Plugin';
 export type { PluginState } from './Plugin';
 
+// Optional building-block helpers for game plugins
+export {
+  WhoTracker,
+  EarlyChatBuffer,
+  SessionTracker,
+  GamePhaseDriver,
+} from './helpers';
+export type {
+  WhoTrackerOptions,
+  EarlyChatBufferOptions,
+  SessionTrackerOptions,
+  GamePhaseDriverOptions,
+  PhaseListener,
+  PollListener,
+} from './helpers';
+
 // All types and interfaces
 export type {
   // Game state
